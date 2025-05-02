@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../src/assets/main.css';
+  
 const CertificateForm = ({ onGenerate }) => {
   const [formData, setFormData] = useState({
     studentName: '',

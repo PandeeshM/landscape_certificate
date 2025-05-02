@@ -1,3 +1,84 @@
+form {
+  max-width: 600px;
+  margin: 0 auto;
+  background: #f9f9f9;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+input {
+  background: #fff !important;
+  z-index: 1000;
+  position: relative;
+}
+
+form div {
+  margin-bottom: 1rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+input[type="text"],
+input[type="date"],
+input[type="file"] {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background: #aaa;
+  cursor: not-allowed;
+}
+
+.toast {
+  margin-top: 1rem;
+  padding: 1rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.toast.success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.toast.error {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.error {
+  color: red;
+  font-size: 0.85rem;
+}
+
+@font-face {
+  font-family: 'Cinzel Decorative';
+  src: url('/fonts/CinzelDecorative-Bold.ttf') format('truetype');
+  font-weight: 700;
+}
+
+.certificate-title {
+  font-family: 'Cinzel Decorative', serif;
+}
+
+
 .certificate-container {
     position: relative;
     width: 100%;
@@ -9,7 +90,39 @@
     box-shadow: 0 0 10px rgba(0,0,0,0.2);
     overflow: hidden;
   }
-  
+  h1 {
+    font-family: 'Great Vibes', cursive;
+    font-size: 40px;
+  }
+  .org-title {
+    .cinzel-decorative-regular {
+      font-family: "Cinzel Decorative", serif;
+      font-weight: 400;
+      font-style: normal;
+    }
+    
+    .cinzel-decorative-bold {
+      font-family: "Cinzel Decorative", serif;
+      font-weight: 700;
+      font-style: normal;
+    }
+    
+    .cinzel-decorative-black {
+      font-family: "Cinzel Decorative", serif;
+      font-weight: 900;
+      font-style: normal;
+    }
+    
+  }
+    .org-name {
+        font-family: 'Cinzel', serif;
+        font-weight: 700;
+        text-transform: uppercase;
+    }    
+    p {
+        font-family: 'Roboto', sans-serif;
+      }
+      
   /* Green gradient border */
   .certificate-border::before {
     content: '';
@@ -21,7 +134,12 @@
     background: linear-gradient(135deg, #4CAF50, transparent 70%);
     z-index: 0;
   }
-  
+  .insitutename {
+    font-family: 'Cinzel Decorative', serif;
+    font-size: 24px;
+    text-align: center;
+    margin-top: 20px;
+  }
   /* Faint logo watermark */
   .certificate-watermark {
     position: absolute;
@@ -48,4 +166,3 @@
     text-align: center;
     z-index: 2;
   }
-  
