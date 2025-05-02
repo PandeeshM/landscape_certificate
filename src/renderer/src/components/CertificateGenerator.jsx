@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { PDFDocument, rgb } from 'pdf-lib';
 import { saveAs } from 'file-saver';
 import fontkit from '@pdf-lib/fontkit';
-
 const CertificateGenerator = () => {
   const [formData, setFormData] = useState({
     studentName: '',
