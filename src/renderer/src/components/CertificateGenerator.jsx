@@ -136,6 +136,4 @@ export const generateCertificate = async (data) => {
   link.click();
 };
   
-
-  
-  export default generateCertificate;
+export default generateCertificate;
