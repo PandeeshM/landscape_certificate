@@ -1,191 +1,147 @@
 import React, { useState } from 'react';
-import '../src/assets/main.css';
-  
+import '../assets/main.css';
+
 const CertificateForm = ({ onGenerate }) => {
   const [formData, setFormData] = useState({
     studentName: '',
     institutionName: '',
     visitDate: '',
+    holdDate: '',
     companyName: '',
-    certificateTitle: 'Certificate Of Participation',
+    certificateTitle: 'Certificate of Completion',
     serialNumber: '',
     logo: null,
     signature: null,
   });
 
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [previewImg, setPreviewImg] = useState(null);
-  const [previewSignature, setPreviewSignature] = useState(null);
-  const [toast, setToast] = useState({ show: false, message: '', type: '' });
-  const [formErrors, setFormErrors] = useState({});
-  const [formTouched, setFormTouched] = useState({});
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
 
-  const validateField = (name, value) => {
-    if (!value) {
-      setFormErrors((prev) => ({ ...prev, [name]: 'This field is required.' }));
-    } else {
-      setFormErrors((prev) => ({ ...prev, [name]: '' }));
-    }
-  };
-
-  const handleBlur = (e) => {
-    const { name, value } = e.target;
-    setFormTouched((prev) => ({ ...prev, [name]: true }));
-    validateField(name, value);
+  // Function to validate date format and range
+  const isValidDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const year = date.getFullYear();
+    return /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && year >= 1900 && year <= 2100;
   };
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
 
-    if (files && files[0]) {
+    if (files) {
       const reader = new FileReader();
-      reader.onload = () => {
-        setFormData((prev) => ({
-          ...prev,
-          [name]: reader.result,
-        }));
-        if (name === 'logo') {
-          setPreviewImg(reader.result);
-        }
-        if (name === 'signature') {
-          setPreviewSignature(reader.result);
-        }
-      };
+      reader.onload = () =>
+        setFormData((prev) => ({ ...prev, [name]: reader.result }));
       reader.readAsDataURL(files[0]);
     } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsGenerating(true);
+    setLoading(true);
+    setMessage('');
+
+    // Validate dates
+    if (!isValidDate(formData.visitDate) || !isValidDate(formData.holdDate)) {
+      setMessage('❌ Please enter valid dates with 4-digit years.');
+      setLoading(false);
+      return;
+    }
+
     try {
-      onGenerate(formData);
-      setToast({ show: true, message: 'Certificate generated successfully!', type: 'success' });
-    } catch (error) {
-      setToast({ show: true, message: 'Failed to generate certificate.', type: 'error' });
+      await onGenerate(formData);
+      setMessage('🎉 Certificate generated successfully!');
+    } catch (err) {
+      console.error(err);
+      setMessage('❌ Failed to generate certificate.');
     } finally {
-      setIsGenerating(false);
+      setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} style={{ padding: 20 }}>
-      <div>
-        <label>Student Name:</label>
+    <form onSubmit={handleSubmit} style={{ padding: '20px', maxWidth: 600 }}>
+      <label>
         <input
           name="studentName"
           placeholder="Student Name"
-          value={formData.studentName}
-          onChange={handleChange}
-          onBlur={handleBlur}
           required
+          onChange={handleChange}
         />
-        {formTouched.studentName && formErrors.studentName && (
-          <span className="error">{formErrors.studentName}</span>
-        )}
-      </div>
-
-      <div>
-        <label>Institution Name:</label>
+      </label>
+      <label>
         <input
           name="institutionName"
           placeholder="Institution Name"
-          value={formData.institutionName}
-          onChange={handleChange}
-          onBlur={handleBlur}
           required
-        />
-        {formTouched.institutionName && formErrors.institutionName && (
-          <span className="error">{formErrors.institutionName}</span>
-        )}
-      </div>
-
-      <div>
-        <label>Visit Date:</label>
-        <input
-          type="date"
-          name="visitDate"
-          value={formData.visitDate}
           onChange={handleChange}
-          onBlur={handleBlur}
-          required
         />
-      </div>
-
-      <div>
-        <label>Company Name:</label>
-        <input
-          name="companyName"
-          placeholder="Company Name"
-          value={formData.companyName}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          required
-        />
-      </div>
-
-      <div>
-        <label>Certificate Title:</label>
-        <input
-          name="certificateTitle"
-          placeholder="Certificate Title"
-          value={formData.certificateTitle}
-          onChange={handleChange}
-          onBlur={handleBlur}
-          required
-        />
-      </div>
-
-      <div>
-        <label>Serial Number:</label>
+      </label>
+      <input
+        name="companyName"
+        placeholder="Company Name"
+        required
+        onChange={handleChange}
+      />
+      <label>Date:</label>
+      <input
+        name="visitDate"
+        type="date"
+        required
+        onChange={handleChange}
+      />
+      <label>HoldOn Date:</label>
+      <input
+        name="holdDate"
+        type="date"
+        required
+        onChange={handleChange}
+      />
+      <label>
         <input
           name="serialNumber"
           placeholder="Serial Number"
-          value={formData.serialNumber}
           onChange={handleChange}
-          onBlur={handleBlur}
         />
-      </div>
-
-      <div>
-        <label>Upload Logo:</label>
+      </label>
+      <label>
+        Upload Logo:{' '}
         <input
-          type="file"
           name="logo"
-          accept="image/*"
-          onChange={handleChange}
-          required
-        />
-        {previewImg && <img src={previewImg} alt="Logo Preview" style={{ width: '100px', height: '100px' }} />}
-      </div>
-
-      <div>
-        <label>Upload Signature:</label>
-        <input
           type="file"
-          name="signature"
           accept="image/*"
-          onChange={handleChange}
           required
+          onChange={handleChange}
         />
-        {previewSignature && (
-          <img src={previewSignature} alt="Signature Preview" style={{ width: '100px', height: '50px' }} />
-        )}
-      </div>
+      </label>
+      <label>
+        Upload Signature:{' '}
+        <input
+          name="signature"
+          type="file"
+          accept="image/*"
+          required
+          onChange={handleChange}
+        />
+      </label>
 
-      <button type="submit" disabled={isGenerating}>
-        {isGenerating ? 'Generating...' : 'Generate'}
+      <button type="submit" disabled={loading}>
+        {loading ? 'Generating...' : 'Generate Certificate'}
       </button>
 
-      {toast.show && <div className={`toast ${toast.type}`}>{toast.message}</div>}
+      {message && (
+        <p
+          style={{
+            marginTop: '10px',
+            color: message.startsWith('🎉') ? 'green' : 'red',
+          }}
+        >
+          {message}
+        </p>
+      )}
     </form>
   );
 };
 
 export default CertificateForm;
-

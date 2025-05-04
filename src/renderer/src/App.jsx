@@ -1,14 +1,12 @@
-  import React from 'react';
+import React from 'react';
+import CertificateForm from './components/CertificateForm';
+import generateCertificate from './components/CertificateGenerator';
 
-//import './components/Certificatetemplate.css'; // Import the CSS file
-//import CertificateForm from'./components/CertificateForm';
-import CertificateGenerator from './components/CertificateGenerator';
 function App() {
   return (
     <div>
-      <h1> Certificate Generator</h1>
-      {/* Render the CertificateForm component */}
-     <CertificateGenerator/>
+      <h1>Certificate Generator</h1>
+      <CertificateForm onGenerate={generateCertificate} />
     </div>
   );
 }

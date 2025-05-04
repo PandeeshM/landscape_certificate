@@ -77,6 +77,28 @@ button:disabled {
 .certificate-title {
   font-family: 'Cinzel Decorative', serif;
 }
+@font-face {
+  font-family: 'Cinzel Decorative';
+  src: url('/fonts/CinzelDecorative-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Great Vibes';
+  src: url('/fonts/GreatVibes-Regular.ttf') format('truetype');
+}
+
+.title {
+  font-family: 'Cinzel Decorative', serif;
+}
+
+.subtitle {
+  font-family: 'Great Vibes', cursive;
+}
+
+
+.certificate-title {
+  font-family: 'Cinzel Decorative', serif;
+}
 
 
 .certificate-container {
