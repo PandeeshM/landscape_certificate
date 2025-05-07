@@ -1,7 +1,31 @@
 // generateCertificate.js
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
+import fontkit from '@pdf-lib/fontkit';
+
+function dataURLToUint8Array(dataURL) {
+  const base64 = dataURL.split(',')[1];
+  const binary = atob(base64);
+  const len = binary.length;
+  const bytes = new Uint8Array(len);
+  for (let i = 0; i < len; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
 
 export const generateCertificate = async (data) => {
+  // Validate only required image inputs
+  const validateImage = (imageData, name) => {
+    if (!imageData) return;
+    if (typeof imageData !== 'string' || !imageData.startsWith('data:image/png')) {
+      throw new Error(`The ${name} is not a valid PNG file!`);
+    }
+  };
+
+  // Only validate required fields
+  validateImage(data.logo, 'logo');
+  validateImage(data.signature, 'signature');
+
   const {
     studentName,
     institutionName,
@@ -15,10 +39,10 @@ export const generateCertificate = async (data) => {
   } = data;
 
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
   const page = pdfDoc.addPage([842, 595]);
   const { width, height } = page.getSize();
 
-  const black = rgb(0, 0, 0);
   const green = rgb(0, 0.5, 0);
 
   page.drawRectangle({
@@ -28,13 +52,35 @@ export const generateCertificate = async (data) => {
     height: height - 20,
     borderColor: green,
     borderWidth: 4,
+    borderRadius: 15
   });
 
-  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  if (data.topBorder) {
+    const topBorderBytes = dataURLToUint8Array(data.topBorder);
+    const topBorderImg = await pdfDoc.embedPng(topBorderBytes);
+    page.drawImage(topBorderImg, {
+      x: (width - 600) / 2,
+      y: height - 60,
+      width: 600,
+      height: 50,
+    });
+  }
 
-  if (logo) {
-    const logoImg = await pdfDoc.embedPng(logo);
+  if (data.bottomBorder) {
+    const bottomBorderBytes = dataURLToUint8Array(data.bottomBorder);
+    const bottomBorderImg = await pdfDoc.embedPng(bottomBorderBytes);
+    page.drawImage(bottomBorderImg, {
+      x: (width - 600) / 2,
+      y: 10,
+      width: 600,
+      height: 50,
+    });
+  }
+
+  // Handle logo - use uploaded PNG if available
+  if (data.logo) {
+    const logoBytes = dataURLToUint8Array(data.logo);
+    const logoImg = await pdfDoc.embedPng(logoBytes);
     page.drawImage(logoImg, {
       x: 40,
       y: height - 100,
@@ -43,16 +89,32 @@ export const generateCertificate = async (data) => {
     });
   }
 
+  // Try to embed OldEnglish font with proper error handling
+  let oldEnglishFont = null;
+  try {
+    const fontUrl = new URL('../assets/Fonts/oldenglish.ttf', import.meta.url).href;
+    const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+    oldEnglishFont = await pdfDoc.embedFont(fontBytes);
+  } catch (error) {
+    console.error('Failed to load OldEnglish font:', error);
+    // Fallback to TimesRoman if OldEnglish font fails to load
+    oldEnglishFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  }
+
+  // Always use standard fonts as fallback
+  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
   page.drawText(certificateTitle, {
     x: 240,
     y: height - 100,
     size: 28,
     color: green,
-    font: boldFont,
+    font: oldEnglishFont,
   });
 
   page.drawText(`S No: ${serialNumber}`, {
-    x: width - 180,
+    x: width - 250,
     y: height - 60,
     size: 12,
     font: timesRomanFont,
@@ -90,8 +152,8 @@ export const generateCertificate = async (data) => {
   });
 
   page.drawText(companyName, {
-    x: centerX,
-    y: baseY - 10,
+    x: 80,
+    y: 290,
     size: 18,
     font: boldFont,
     color: green,

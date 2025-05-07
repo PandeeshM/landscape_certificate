@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=UnifrakturCook:wght@700&family=Great+Vibes&family=Archivo+Black&display=swap');
+
 form {
   max-width: 600px;
   margin: 0 auto;
@@ -67,6 +69,36 @@ button:disabled {
   color: red;
   font-size: 0.85rem;
 }
+.certificate-container {
+  position: relative;
+  width: 100%;
+  max-width: 842px; /* A4 width in px */
+  height: 595px;    /* A4 height in px (landscape) */
+  margin: auto;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+
+  /* Decorative gradient border */
+  border: 10px solid transparent;
+  background-image: 
+    linear-gradient(to bottom, 
+      #ffffff 0%,     /* Top white */
+      #d5f5dd 10%,    /* Blend into light green */
+      #c8f7d1 90%,    /* Main light green area */
+      #d5f5dd 95%,    /* Blend out */
+      #ffffff 100%    /* Bottom white */
+    ),
+    linear-gradient(to right, #4caf50, #81c784); /* Border gradient */
+  background-origin: border-box;
+  background-clip: content-box, border-box;
+}
+
+  h1 {
+    font-family: 'Great Vibes', cursive;
+    font-size: 40px;
+    text-align: center;
+  }
 
 @font-face {
   font-family: 'Cinzel Decorative';
@@ -75,93 +107,33 @@ button:disabled {
 }
 
 .certificate-title {
-  font-family: 'Cinzel Decorative', serif;
-}
-@font-face {
-  font-family: 'Cinzel Decorative';
-  src: url('/fonts/CinzelDecorative-Regular.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Great Vibes';
-  src: url('/fonts/GreatVibes-Regular.ttf') format('truetype');
-}
-
-.title {
-  font-family: 'Cinzel Decorative', serif;
-}
-
-.subtitle {
-  font-family: 'Great Vibes', cursive;
-}
-
-
-.certificate-title {
-  font-family: 'Cinzel Decorative', serif;
-}
-
-
-.certificate-container {
-    position: relative;
-    width: 100%;
-    max-width: 842px; /* A4 width in px */
-    height: 595px;     /* A4 height in px (landscape) */
-    margin: auto;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0,0,0,0.2);
-    overflow: hidden;
+  .unifrakturcook-bold {
+    font-family: "UnifrakturCook", cursive;
+    font-weight: 700;
+    font-style: normal;
   }
-  h1 {
-    font-family: 'Great Vibes', cursive;
-    font-size: 40px;
-  }
-  .org-title {
-    .cinzel-decorative-regular {
-      font-family: "Cinzel Decorative", serif;
-      font-weight: 400;
-      font-style: normal;
-    }
-    
-    .cinzel-decorative-bold {
-      font-family: "Cinzel Decorative", serif;
-      font-weight: 700;
-      font-style: normal;
-    }
-    
-    .cinzel-decorative-black {
-      font-family: "Cinzel Decorative", serif;
-      font-weight: 900;
-      font-style: normal;
-    }
-    
-  }
-    .org-name {
-        font-family: 'Cinzel', serif;
-        font-weight: 700;
-        text-transform: uppercase;
-    }    
-    p {
-        font-family: 'Roboto', sans-serif;
-      }
+  
+}
+.insitutename {
+  font-family: 'Archivo Black', sans-serif;
+  font-size: 24px;
+  text-align: center;
+  margin-top: 20px;
+}
+.company-name {font-family: 'Cinzel Decorative', serif;
+font-weight: 700; font-style: normal; text-align: center; font-size: 24px; margin-top: 20px;}
+
+.heldon {font-family: 'Great Vibes', cursive;
+font-weight: 400; font-style: normal; text-align: center; font-size: 24px; margin-top: 20px;}
+
+.body-text {font-family: 'Cinzel Decorative', serif;}
+
+  
       
-  /* Green gradient border */
-  .certificate-border::before {
-    content: '';
-    position: absolute;
-    top: -5%;
-    left: -5%;
-    width: 110%;
-    height: 110%;
-    background: linear-gradient(135deg, #4CAF50, transparent 70%);
-    z-index: 0;
-  }
-  .insitutename {
-    font-family: 'Cinzel Decorative', serif;
-    font-size: 24px;
-    text-align: center;
-    margin-top: 20px;
-  }
+ 
+  
+  
+ 
   /* Faint logo watermark */
   .certificate-watermark {
     position: absolute;

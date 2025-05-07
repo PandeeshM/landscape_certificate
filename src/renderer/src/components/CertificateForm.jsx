@@ -10,8 +10,10 @@ const CertificateForm = ({ onGenerate }) => {
     companyName: '',
     certificateTitle: 'Certificate of Completion',
     serialNumber: '',
-    logo: null,
-    signature: null,
+    logo: '',
+    signature: '',
+    topBorder: '',
+    bottomBorder: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -25,13 +27,51 @@ const CertificateForm = ({ onGenerate }) => {
   };
 
   const handleChange = (e) => {
-    const { name, value, files } = e.target;
-
-    if (files) {
+    const { name, files, value } = e.target;
+    if (files && files.length > 0) {
+      const file = files[0];
+      
+      // Validate file type using multiple methods
+      const isPNG = file.type.startsWith('image/png') || 
+                    file.name.toLowerCase().endsWith('.png');
+      
+      if (!isPNG) {
+        setMessage('Please upload a PNG file!');
+        return;
+      }
+      
+      // Validate file size
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        setMessage('File size must be less than 5MB!');
+        return;
+      }
+      
       const reader = new FileReader();
-      reader.onload = () =>
-        setFormData((prev) => ({ ...prev, [name]: reader.result }));
-      reader.readAsDataURL(files[0]);
+      reader.onload = (event) => {
+        const result = event.target.result;
+        
+        // Ensure we get the complete data URL
+        if (typeof result === 'string' && result.startsWith('data:')) {
+          // Extract just the base64 part
+          const base64Data = result.split(',')[1];
+          if (base64Data) {
+            // Reconstruct with proper PNG prefix
+            const pngDataUrl = `data:image/png;base64,${base64Data}`;
+            setFormData((prev) => ({ ...prev, [name]: pngDataUrl }));
+          } else {
+            setMessage('Failed to extract image data!');
+          }
+        } else {
+          setMessage('Failed to read image data!');
+        }
+      };
+      
+      // Add error handling for file reading
+      reader.onerror = () => {
+        setMessage('Error reading the file. Please try again.');
+      };
+      
+      reader.readAsDataURL(file);
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -44,17 +84,51 @@ const CertificateForm = ({ onGenerate }) => {
 
     // Validate dates
     if (!isValidDate(formData.visitDate) || !isValidDate(formData.holdDate)) {
-      setMessage('❌ Please enter valid dates with 4-digit years.');
+      setMessage('Please enter valid dates with 4-digit years.');
       setLoading(false);
       return;
     }
 
+    // Add detailed logging of form data before validation
+    console.log('Form data before validation:', {
+      logo: formData.logo ? 'Present' : 'Not present',
+      signature: formData.signature ? 'Present' : 'Not present',
+      topBorder: formData.topBorder ? 'Present' : 'Not present',
+      bottomBorder: formData.bottomBorder ? 'Present' : 'Not present'
+    });
+
+    // Validate PNG files before submission (only required fields)
+    const validatePngFile = (dataUrl, fieldName) => {
+      if (!dataUrl) {
+        console.log(`No data for ${fieldName}`);
+        return true;
+      }
+      
+      if (typeof dataUrl !== 'string') {
+        console.log(`Invalid data type for ${fieldName}:`, typeof dataUrl);
+        setMessage(`The ${fieldName} is not a valid PNG file!`);
+        return false;
+      }
+      
+      if (!dataUrl.startsWith('data:image/png')) {
+        console.log(`Invalid data URL for ${fieldName}:`, dataUrl.substring(0, 50) + '...');
+        setMessage(`The ${fieldName} is not a valid PNG file!`);
+        return false;
+      }
+      
+      return true;
+    };
+
+    // Validate required fields only
+    if (!validatePngFile(formData.logo, 'logo')) return;
+    if (!validatePngFile(formData.signature, 'signature')) return;
+
     try {
       await onGenerate(formData);
-      setMessage('🎉 Certificate generated successfully!');
+      setMessage('Certificate generated successfully!');
     } catch (err) {
-      console.error(err);
-      setMessage('❌ Failed to generate certificate.');
+      console.error('Error in onGenerate:', err);
+      setMessage('Failed to generate certificate.');
     } finally {
       setLoading(false);
     }
@@ -110,7 +184,7 @@ const CertificateForm = ({ onGenerate }) => {
         <input
           name="logo"
           type="file"
-          accept="image/*"
+          accept="image/png"
           required
           onChange={handleChange}
         />
@@ -120,8 +194,26 @@ const CertificateForm = ({ onGenerate }) => {
         <input
           name="signature"
           type="file"
-          accept="image/*"
+          accept="image/png"
           required
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Upload Top Border:{' '}
+        <input
+          name="topBorder"
+          type="file"
+          accept="image/png"
+          onChange={handleChange}
+        />
+      </label>
+      <label>
+        Upload Bottom Border:{' '}
+        <input
+          name="bottomBorder"
+          type="file"
+          accept="image/png"
           onChange={handleChange}
         />
       </label>
