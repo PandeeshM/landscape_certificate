@@ -8,12 +8,8 @@ const CertificateForm = ({ onGenerate }) => {
     visitDate: '',
     holdDate: '',
     companyName: '',
-    certificateTitle: 'Certificate of Completion',
-    serialNumber: '',
-    logo: '',
-    signature: '',
-    topBorder: '',
-    bottomBorder: ''
+    certificateTitle: 'Certificate of Participation',
+    serialNumber: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -97,38 +93,18 @@ const CertificateForm = ({ onGenerate }) => {
       bottomBorder: formData.bottomBorder ? 'Present' : 'Not present'
     });
 
-    // Validate PNG files before submission (only required fields)
-    const validatePngFile = (dataUrl, fieldName) => {
-      if (!dataUrl) {
-        console.log(`No data for ${fieldName}`);
-        return true;
-      }
-      
-      if (typeof dataUrl !== 'string') {
-        console.log(`Invalid data type for ${fieldName}:`, typeof dataUrl);
-        setMessage(`The ${fieldName} is not a valid PNG file!`);
-        return false;
-      }
-      
-      if (!dataUrl.startsWith('data:image/png')) {
-        console.log(`Invalid data URL for ${fieldName}:`, dataUrl.substring(0, 50) + '...');
-        setMessage(`The ${fieldName} is not a valid PNG file!`);
-        return false;
-      }
-      
-      return true;
-    };
 
-    // Validate required fields only
-    if (!validatePngFile(formData.logo, 'logo')) return;
-    if (!validatePngFile(formData.signature, 'signature')) return;
 
     try {
       await onGenerate(formData);
       setMessage('Certificate generated successfully!');
     } catch (err) {
       console.error('Error in onGenerate:', err);
-      setMessage('Failed to generate certificate.');
+      if (err.message.includes('PNG file')) {
+        setMessage('Failed to load required assets. Please ensure all image files are in PNG format and properly placed in the assets folder.');
+      } else {
+        setMessage('Failed to generate certificate. Please check your inputs and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -179,45 +155,25 @@ const CertificateForm = ({ onGenerate }) => {
           onChange={handleChange}
         />
       </label>
-      <label>
-        Upload Logo:{' '}
-        <input
+
+<label>logo</label>
+<label>
+<input
           name="logo"
           type="file"
-          accept="image/png"
-          required
+          accept="image/*"
           onChange={handleChange}
         />
-      </label>
-      <label>
-        Upload Signature:{' '}
-        <input
+</label>
+<label>signature</label>
+<label>
+<input
           name="signature"
           type="file"
-          accept="image/png"
-          required
+          accept="image/*"
           onChange={handleChange}
         />
-      </label>
-      <label>
-        Upload Top Border:{' '}
-        <input
-          name="topBorder"
-          type="file"
-          accept="image/png"
-          onChange={handleChange}
-        />
-      </label>
-      <label>
-        Upload Bottom Border:{' '}
-        <input
-          name="bottomBorder"
-          type="file"
-          accept="image/png"
-          onChange={handleChange}
-        />
-      </label>
-
+</label>
       <button type="submit" disabled={loading}>
         {loading ? 'Generating...' : 'Generate Certificate'}
       </button>

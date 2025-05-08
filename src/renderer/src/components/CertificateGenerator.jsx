@@ -2,6 +2,9 @@
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib';
 import fontkit from '@pdf-lib/fontkit';
 
+// Use relative paths directly
+const assetsPath = '../assets';
+
 function dataURLToUint8Array(dataURL) {
   const base64 = dataURL.split(',')[1];
   const binary = atob(base64);
@@ -36,68 +39,125 @@ export const generateCertificate = async (data) => {
     serialNumber,
     logo,
     signature,
+    visitDate,
   } = data;
 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
-  const page = pdfDoc.addPage([842, 595]);
+  const page = pdfDoc.addPage([700, 500]);
   const { width, height } = page.getSize();
 
-  const green = rgb(0, 0.5, 0);
-
+  // Draw white background first
   page.drawRectangle({
-    x: 10,
-    y: 10,
-    width: width - 20,
-    height: height - 20,
-    borderColor: green,
-    borderWidth: 4,
-    borderRadius: 15
+    x: 0,
+    y: 0,
+    width,
+    height,
+    color: rgb(1, 1, 1),
   });
 
-  if (data.topBorder) {
-    const topBorderBytes = dataURLToUint8Array(data.topBorder);
-    const topBorderImg = await pdfDoc.embedPng(topBorderBytes);
+  // Draw a continuous black border on top
+  const borderThickness = 8;
+  page.drawRectangle({
+    x: borderThickness / 2,
+    y: borderThickness / 2,
+    width: width - borderThickness,
+    height: height - borderThickness,
+    borderColor: rgb(0, 0, 0),
+    borderWidth: borderThickness,
+    borderOpacity: 1,
+  });
+
+  // Use default font since we can't load custom fonts in browser
+  const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
+  
+  // Always use a plain white background
+  page.drawRectangle({
+    x: 0,
+    y: 0,
+    width,
+    height,
+    color: rgb(1, 1, 1),
+  });
+
+  // Add static top and bottom borders
+  try {
+    const response = await fetch(new URL('../assets/backgrounds/top.png', import.meta.url));
+    if (!response.ok) throw new Error('Failed to load top border');
+    const topBorderImg = await pdfDoc.embedPng(await response.arrayBuffer());
     page.drawImage(topBorderImg, {
-      x: (width - 600) / 2,
+      x: (width - 400) / 2,
       y: height - 60,
-      width: 600,
-      height: 50,
-    });
-  }
-
-  if (data.bottomBorder) {
-    const bottomBorderBytes = dataURLToUint8Array(data.bottomBorder);
-    const bottomBorderImg = await pdfDoc.embedPng(bottomBorderBytes);
-    page.drawImage(bottomBorderImg, {
-      x: (width - 600) / 2,
-      y: 10,
-      width: 600,
-      height: 50,
-    });
-  }
-
-  // Handle logo - use uploaded PNG if available
-  if (data.logo) {
-    const logoBytes = dataURLToUint8Array(data.logo);
-    const logoImg = await pdfDoc.embedPng(logoBytes);
-    page.drawImage(logoImg, {
-      x: 40,
-      y: height - 100,
-      width: 80,
+      width: 400,
       height: 80,
     });
+  } catch (error) {
+    console.error('Error loading top border:', error);
+    throw new Error('Failed to load top border. Please ensure all required assets are present.');
+  }
+
+  try {
+    const response = await fetch(new URL('../assets/backgrounds/bottom.png', import.meta.url));
+    if (!response.ok) throw new Error('Failed to load bottom border');
+    const bottomBorderImg = await pdfDoc.embedPng(await response.arrayBuffer());
+    page.drawImage(bottomBorderImg, {
+      x: (width - 400) / 2,
+      y: 0,
+      width: 400,
+      height: 80,
+    });
+  } catch (error) {
+    console.error('Error loading bottom border:', error);
+    throw new Error('Failed to load bottom border. Please ensure all required assets are present.');
+  }
+
+   const green = rgb(0, 0.5, 0);
+
+  // Draw dynamic logo if provided
+  if (logo) {
+    try {
+      // logo is a data URL (base64 PNG)
+      const logoBytes = dataURLToUint8Array(logo);
+      const logoImg = await pdfDoc.embedPng(logoBytes);
+      page.drawImage(logoImg, {
+        x: 40,
+        y: height - 120,
+        width: 100,
+        height: 60,
+      });
+    } catch (error) {
+      console.error('Error loading logo:', error);
+      // If logo fails to load, just skip it without throwing an error
+    }
+  }
+
+  // Draw watermark in the center if logo is provided
+  if (logo) {
+    try {
+      const logoBytes = dataURLToUint8Array(logo);
+      const watermarkImg = await pdfDoc.embedPng(logoBytes);
+      const wmWidth = 350;
+      const wmHeight = 250;
+      page.drawImage(watermarkImg, {
+        x: (width - wmWidth) / 2,
+        y: (height - wmHeight) / 2,
+        width: wmWidth,
+        height: wmHeight,
+        opacity: 0.07,
+      });
+    } catch (error) {
+      console.error('Error loading watermark:', error);
+    }
   }
 
   // Try to embed OldEnglish font with proper error handling
   let oldEnglishFont = null;
   try {
-    const fontUrl = new URL('../assets/Fonts/oldenglish.ttf', import.meta.url).href;
-    const fontBytes = await fetch(fontUrl).then(res => res.arrayBuffer());
+    const fontBytes = await fetch(new URL('../assets/Fonts/oldenglish.ttf', import.meta.url)).then(res => res.arrayBuffer());
     oldEnglishFont = await pdfDoc.embedFont(fontBytes);
   } catch (error) {
-    console.error('Failed to load OldEnglish font:', error);
-    // Fallback to TimesRoman if OldEnglish font fails to load
+    console.error('Failed to load certificate font:', error);
+    // Fallback to TimesRoman if custom font fails to load
     oldEnglishFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   }
 
@@ -105,90 +165,123 @@ export const generateCertificate = async (data) => {
   const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
 
+  // Centering helper
+  function centerX(text, font, size) {
+    return (width - font.widthOfTextAtSize(text, size)) / 2;
+  }
+
+  // Draw the certificate title only once, centered, with the custom font and in green color
   page.drawText(certificateTitle, {
-    x: 240,
-    y: height - 100,
-    size: 28,
-    color: green,
+    x: centerX(certificateTitle, oldEnglishFont, 36),
+    y: height - 110,
+    size: 36,
+    color: rgb(0.282, 0.431, 0.086),
     font: oldEnglishFont,
   });
 
-  page.drawText(`S No: ${serialNumber}`, {
-    x: width - 250,
-    y: height - 60,
-    size: 12,
-    font: timesRomanFont,
-  });
-
-  const centerX = 80;
-  const baseY = 300;
-
-  page.drawText(`This is to certify that`, {
-    x: centerX,
-    y: baseY + 80,
-    size: 16,
-    font: timesRomanFont,
-  });
-
-  page.drawText(`${studentName}`, {
-    x: centerX + 220,
-    y: baseY + 80,
-    size: 16,
+  // S No. (top right)
+  page.drawText(`S NO: ${serialNumber}`, {
+    x: width - 100,
+    y: height - 50,
+    size: 14,
     font: boldFont,
   });
 
-  page.drawText(`from ${institutionName}`, {
-    x: centerX,
-    y: baseY + 50,
-    size: 16,
-    font: boldFont,
-  });
+  // Main body
+  let y = height - 180;
+  const lineSpacing = 32;
 
-  page.drawText(`participated in the Industrial Visit at`, {
-    x: centerX,
-    y: baseY + 20,
-    size: 16,
+  // This is to certify that ............................................. from
+  const certLine = `This is to certify that ${studentName} from`;
+  page.drawText(certLine, {
+    x: centerX(certLine, boldFont, 20),
+    y,
+    size: 20,
     font: timesRomanFont,
   });
+  y -= lineSpacing;
 
-  page.drawText(companyName, {
-    x: 80,
-    y: 290,
+  // Institute name (bold)
+  page.drawText(institutionName, {
+    x: centerX(institutionName, boldFont, 24),
+    y,
+    size: 24,
+    font: boldFont,
+  });
+  y -= lineSpacing;
+
+  // participated in the Industrial Visit
+  const visitLine = 'participated in the Industrial Visit';
+  page.drawText(visitLine, {
+    x: centerX(visitLine, timesRomanFont, 18),
+    y,
     size: 18,
+    font: timesRomanFont,
+  });
+  y -= lineSpacing;
+
+  // at
+  const atLine = 'at';
+  page.drawText(atLine, {
+    x: centerX(atLine, timesRomanFont, 18),
+    y,
+    size: 18,
+    font: timesRomanFont,
+  });
+  y -= lineSpacing;
+
+  // Company name (green, bold)
+  page.drawText(companyName, {
+    x: centerX(companyName, boldFont, 22),
+    y,
+    size: 22,
     font: boldFont,
-    color: green,
+    color: rgb(0.094, 0.274, 0.067),
+  });
+  y -= lineSpacing;
+
+  // held on ... (bold)
+  const heldOnLine = `held on ${holdDate}`;
+  page.drawText(heldOnLine, {
+    x: centerX(heldOnLine, boldFont, 20),
+    y,
+    size: 20,
+    font: boldFont,
   });
 
-  page.drawText(`held on ${holdDate}`, {
-    x: centerX,
-    y: baseY - 40,
-    size: 16,
-    font: boldFont,
-  });
-
-  page.drawText('Date', {
-    x: 80,
+  // Date (bottom left)
+  page.drawText(`Date: ${data.visitDate}`, {
+    x: 60,
     y: 60,
-    size: 12,
+    size: 14,
     font: timesRomanFont,
   });
 
-  if (signature) {
-    const signatureImg = await pdfDoc.embedPng(signature);
-    page.drawImage(signatureImg, {
-      x: width - 160,
-      y: 30,
-      width: 100,
-      height: 50,
-    });
-  }
-
+  // Authorized Signatory (bottom right)
   page.drawText('Authorized Signatory', {
-    x: width - 180,
-    y: 20,
-    size: 10,
-    font: timesRomanFont,
+    x: width - 200,
+    y: 70,
+    size: 14,
+    font: boldFont,
   });
+
+  // Draw dynamic signature if provided
+  if (signature) {
+    try {
+      // signature is a data URL (base64 PNG)
+      const signatureBytes = dataURLToUint8Array(signature);
+      const signatureImg = await pdfDoc.embedPng(signatureBytes);
+      page.drawImage(signatureImg, {
+        x: width - 180,
+        y: 40,
+        width: 120,
+        height: 90,
+      });
+    } catch (error) {
+      console.error('Error loading signature:', error);
+      // If signature fails to load, just skip it without throwing an error
+    }
+  }
 
   const pdfBytes = await pdfDoc.save();
   const blob = new Blob([pdfBytes], { type: 'application/pdf' });
