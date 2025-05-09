@@ -297,7 +297,7 @@ export const generateCertificate = async (data) => {
     size: 24,
     font: caveatBrushFont,
     color: rgb(0, 0, 0),
-  });
+  })
 
   // Date (bottom left)
   page.drawText(`Date: ${data.visitDate}`, {
