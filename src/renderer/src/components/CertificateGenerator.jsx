@@ -313,8 +313,7 @@ export const generateCertificate = async (data) => {
     y: 70,
     size: 14,
     font: boldFont,
-  });
-
+  })
   // Draw dynamic signature if provided
   if (signature) {
     try {
