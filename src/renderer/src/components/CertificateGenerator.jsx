@@ -159,7 +159,7 @@ export const generateCertificate = async (data) => {
     console.error('Failed to load certificate font:', error);
     // Fallback to TimesRoman if custom font fails to load
     oldEnglishFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  };
+  }
 
   // Load Cinzel Decorative font for company name
   let cinzelFont = null;
@@ -171,7 +171,7 @@ export const generateCertificate = async (data) => {
   } catch (error) {
     console.error('Failed to load Cinzel Decorative font:', error);
     cinzelFont = boldFont; // fallback
-  };
+  }
 
   // Always use standard fonts as fallback
   const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
