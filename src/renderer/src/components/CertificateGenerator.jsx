@@ -294,7 +294,7 @@ export const generateCertificate = async (data) => {
   page.drawText(heldOnLine, {
     x: centerX(heldOnLine, caveatBrushFont, 26),
     y:150,
-    size: 23,
+    size: 24,
     font: caveatBrushFont,
     color: rgb(0, 0, 0),
   });
