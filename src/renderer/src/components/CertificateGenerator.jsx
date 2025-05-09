@@ -171,7 +171,7 @@ export const generateCertificate = async (data) => {
   } catch (error) {
     console.error('Failed to load Cinzel Decorative font:', error);
     cinzelFont = boldFont; // fallback
-  }
+  };
 
   // Always use standard fonts as fallback
   const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
