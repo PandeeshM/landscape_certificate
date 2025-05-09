@@ -161,9 +161,33 @@ export const generateCertificate = async (data) => {
     oldEnglishFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   }
 
+  // Load Cinzel Decorative font for company name
+  let cinzelFont = null;
+  try {
+    const response = await fetch(new URL('../assets/Fonts/CinzelDecorative-Bold.ttf', import.meta.url));
+    if (!response.ok) throw new Error('Failed to load Cinzel Decorative font');
+    const cinzelBytes = await response.arrayBuffer();
+    cinzelFont = await pdfDoc.embedFont(cinzelBytes);
+  } catch (error) {
+    console.error('Failed to load Cinzel Decorative font:', error);
+    cinzelFont = boldFont; // fallback
+  }
+
   // Always use standard fonts as fallback
   const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+
+  // Load Caveat Brush font for "held on ..." line
+  let caveatBrushFont = null;
+  try {
+    const response = await fetch(new URL('../assets/Fonts/CaveatBrush-Regular.ttf', import.meta.url));
+    if (!response.ok) throw new Error('Failed to load Caveat Brush font');
+    const caveatBrushBytes = await response.arrayBuffer();
+    caveatBrushFont = await pdfDoc.embedFont(caveatBrushBytes);
+  } catch (error) {
+    console.error('Failed to load Caveat Brush font:', error);
+    caveatBrushFont = boldFont; // fallback
+  }
 
   // Centering helper
   function centerX(text, font, size) {
@@ -191,10 +215,35 @@ export const generateCertificate = async (data) => {
   let y = height - 180;
   const lineSpacing = 32;
 
-  // This is to certify that ............................................. from
-  const certLine = `This is to certify that ${studentName} from`;
-  page.drawText(certLine, {
-    x: centerX(certLine, boldFont, 20),
+  const prefix = "This is to certify that ";
+  const suffix = " from";
+
+  // Calculate widths for centering
+  const prefixWidth = timesRomanFont.widthOfTextAtSize(prefix, 20);
+  const studentWidth = boldFont.widthOfTextAtSize(studentName, 20);
+  const suffixWidth = timesRomanFont.widthOfTextAtSize(suffix, 20);
+  const totalWidth = prefixWidth + studentWidth + suffixWidth;
+  const startX = (width - totalWidth) / 2;
+
+  // Draw prefix
+  page.drawText(prefix, {
+    x: startX,
+    y,
+    size: 20,
+    font: timesRomanFont,
+  });
+
+  // Draw student name in bold
+  page.drawText(studentName, {
+    x: startX + prefixWidth,
+    y,
+    size: 20,
+    font: boldFont,
+  });
+
+  // Draw suffix
+  page.drawText(suffix, {
+    x: startX + prefixWidth + studentWidth,
     y,
     size: 20,
     font: timesRomanFont,
@@ -203,10 +252,10 @@ export const generateCertificate = async (data) => {
 
   // Institute name (bold)
   page.drawText(institutionName, {
-    x: centerX(institutionName, boldFont, 24),
+    x: centerX(institutionName, cinzelFont, 24),
     y,
     size: 24,
-    font: boldFont,
+    font: cinzelFont,
   });
   y -= lineSpacing;
 
@@ -232,21 +281,22 @@ export const generateCertificate = async (data) => {
 
   // Company name (green, bold)
   page.drawText(companyName, {
-    x: centerX(companyName, boldFont, 22),
+    x: centerX(companyName, cinzelFont, 22),
     y,
     size: 22,
-    font: boldFont,
+    font: cinzelFont,
     color: rgb(0.094, 0.274, 0.067),
   });
   y -= lineSpacing;
 
-  // held on ... (bold)
+  // held on ... (Brush Script style)
   const heldOnLine = `held on ${holdDate}`;
   page.drawText(heldOnLine, {
-    x: centerX(heldOnLine, boldFont, 20),
-    y,
-    size: 20,
-    font: boldFont,
+    x: centerX(heldOnLine, caveatBrushFont, 26),
+    y:150,
+    size: 23,
+    font: caveatBrushFont,
+    color: rgb(0, 0, 0),
   });
 
   // Date (bottom left)
