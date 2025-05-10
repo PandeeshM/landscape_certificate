@@ -108,7 +108,7 @@ export const generateCertificate = async (data) => {
     });
   } catch (error) {
     console.error('Error loading bottom border:', error);
-    throw new Error('Failed to load bottom border. Please ensure all required assets are present.');
+    throw new Error('Failed to load bottom border. Please ensure all required assets are present.!');
   }
 
    const green = rgb(0, 0.5, 0);
