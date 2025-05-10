@@ -338,6 +338,6 @@ export const generateCertificate = async (data) => {
   link.href = URL.createObjectURL(blob);
   link.download = `${studentName}_Certificate.pdf`;
   link.click();
-}
+};
   
 export default generateCertificate; 
