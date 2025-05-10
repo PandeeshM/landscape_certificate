@@ -260,7 +260,7 @@ export const generateCertificate = async (data) => {
   y -= lineSpacing;
 
   // participated in the Industrial Visit
-  const visitLine = 'participated in the Industrial Visit';
+  const visitLine = 'participated in the Industrial Vis65it';
   page.drawText(visitLine, {
     x: centerX(visitLine, timesRomanFont, 18),
     y,
