@@ -4,12 +4,13 @@ import '../assets/main.css';
 const CertificateForm = ({ onGenerate }) => {
   const [formData, setFormData] = useState({
     studentName: '',
+    year: 'I',
+    courseName: '',
     institutionName: '',
     visitDate: '',
     holdDate: '',
     companyName: '',
-    certificateTitle: 'Certificate of Participation',
-    serialNumber: ''
+    certificateTitle: 'Certificate of Participation'
   });
 
   const [loading, setLoading] = useState(false);
@@ -121,6 +122,29 @@ const CertificateForm = ({ onGenerate }) => {
         />
       </label>
       <label>
+        <select
+          name="year"
+          required
+          value={formData.year}
+          onChange={handleChange}
+          className="form-select"
+        >
+          <option value="">Select Year</option>
+          <option value="I">I Year</option>
+          <option value="II">II Year</option>
+          <option value="III">III Year</option>
+          <option value="IV">IV Year</option>
+        </select>
+      </label>
+      <label>
+        <input
+          name="courseName"
+          placeholder="Course Name"
+          required
+          onChange={handleChange}
+        />
+      </label>
+      <label>
         <input
           name="institutionName"
           placeholder="Institution Name"
@@ -148,31 +172,27 @@ const CertificateForm = ({ onGenerate }) => {
         required
         onChange={handleChange}
       />
-      <label>
-        <input
-          name="serialNumber"
-          placeholder="Serial Number"
-          onChange={handleChange}
-        />
-      </label>
 
-<label>logo</label>
 <label>
-<input
-          name="logo"
-          type="file"
-          accept="image/*"
-          onChange={handleChange}
-        />
+  Logo:
+  <input
+    name="logo"
+    type="file"
+    accept="image/*"
+    onChange={handleChange}
+    style={{ display: 'block', margin: '10px 0' }}
+  />
 </label>
-<label>signature</label>
+
 <label>
-<input
-          name="signature"
-          type="file"
-          accept="image/*"
-          onChange={handleChange}
-        />
+  Signature:
+  <input
+    name="signature"
+    type="file"
+    accept="image/*"
+    onChange={handleChange}
+    style={{ display: 'block', margin: '10px 0' }}
+  />
 </label>
       <button type="submit" disabled={loading}>
         {loading ? 'Generating...' : 'Generate Certificate'}

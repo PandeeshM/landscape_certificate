@@ -36,7 +36,6 @@ export const generateCertificate = async (data) => {
     holdDate,
     companyName,
     certificateTitle,
-    serialNumber,
     logo,
     signature,
     visitDate,
@@ -44,72 +43,56 @@ export const generateCertificate = async (data) => {
 
   const pdfDoc = await PDFDocument.create();
   pdfDoc.registerFontkit(fontkit);
-  const page = pdfDoc.addPage([700, 500]);
+  // Set page size to A4 in landscape (842 x 595 points)
+  const page = pdfDoc.addPage([842, 595]);
   const { width, height } = page.getSize();
-
+  
   // Draw white background first
   page.drawRectangle({
     x: 0,
     y: 0,
     width,
     height,
-    color: rgb(1, 1, 1),
+    color: rgb(1, 1, 1), // White background
   });
-
-  // Draw a continuous black border on top
-  const borderThickness = 8;
-  page.drawRectangle({
-    x: borderThickness / 2,
-    y: borderThickness / 2,
-    width: width - borderThickness,
-    height: height - borderThickness,
-    borderColor: rgb(0, 0, 0),
-    borderWidth: borderThickness,
-    borderOpacity: 1,
+  
+  // Draw border using lines for better reliability
+  const borderMargin = 40; // Margin from the page edges
+  const borderWidth = 2;   // Thickness of the border
+  
+  // Draw outer border (top, right, bottom, left)
+  page.drawLine({
+    start: { x: borderMargin, y: height - borderMargin },
+    end: { x: width - borderMargin, y: height - borderMargin },
+    thickness: borderWidth,
+    color: rgb(0.2, 0.2, 0.2),
+  });
+  
+  page.drawLine({
+    start: { x: width - borderMargin, y: height - borderMargin },
+    end: { x: width - borderMargin, y: borderMargin },
+    thickness: borderWidth,
+    color: rgb(0.2, 0.2, 0.2),
+  });
+  
+  page.drawLine({
+    start: { x: width - borderMargin, y: borderMargin },
+    end: { x: borderMargin, y: borderMargin },
+    thickness: borderWidth,
+    color: rgb(0.2, 0.2, 0.2),
+  });
+  
+  page.drawLine({
+    start: { x: borderMargin, y: borderMargin },
+    end: { x: borderMargin, y: height - borderMargin },
+    thickness: borderWidth,
+    color: rgb(0.2, 0.2, 0.2),
   });
 
   // Use default font since we can't load custom fonts in browser
   const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   
-  // Always use a plain white background
-  page.drawRectangle({
-    x: 0,
-    y: 0,
-    width,
-    height,
-    color: rgb(1, 1, 1),
-  });
-
-  // Add static top and bottom borders
-  try {
-    const response = await fetch(new URL('../assets/backgrounds/top.png', import.meta.url));
-    if (!response.ok) throw new Error('Failed to load top border');
-    const topBorderImg = await pdfDoc.embedPng(await response.arrayBuffer());
-    page.drawImage(topBorderImg, {
-      x: (width - 400) / 2,
-      y: height - 60,
-      width: 400,
-      height: 80,
-    });
-  } catch (error) {
-    console.error('Error loading top border:', error);
-    throw new Error('Failed to load top border. Please ensure all required assets are present.');
-  }
-
-  try {
-    const response = await fetch(new URL('../assets/backgrounds/bottom.png', import.meta.url));
-    if (!response.ok) throw new Error('Failed to load bottom border');
-    const bottomBorderImg = await pdfDoc.embedPng(await response.arrayBuffer());
-    page.drawImage(bottomBorderImg, {
-      x: (width - 400) / 2,
-      y: 0,
-      width: 400,
-      height: 80,
-    });
-  } catch (error) {
-    console.error('Error loading bottom border:', error);
-    throw new Error('Failed to load bottom border. Please ensure all required assets are present.');
-  }
+  // Removed top and bottom border images as requested
 
    const green = rgb(0, 0.5, 0);
 
@@ -120,7 +103,7 @@ export const generateCertificate = async (data) => {
       const logoBytes = dataURLToUint8Array(logo);
       const logoImg = await pdfDoc.embedPng(logoBytes);
       page.drawImage(logoImg, {
-        x: 40,
+        x: 60,
         y: height - 120,
         width: 100,
         height: 60,
@@ -143,7 +126,7 @@ export const generateCertificate = async (data) => {
         y: (height - wmHeight) / 2,
         width: wmWidth,
         height: wmHeight,
-        opacity: 0.07,
+        opacity: 0.1, // Increased from 0.07 to 0.1 (10% opacity)
       });
     } catch (error) {
       console.error('Error loading watermark:', error);
@@ -203,20 +186,14 @@ export const generateCertificate = async (data) => {
     font: oldEnglishFont,
   });
 
-  // S No. (top right)
-  page.drawText(`S NO: ${serialNumber}`, {
-    x: width - 100,
-    y: height - 50,
-    size: 14,
-    font: boldFont,
-  });
+  // Serial number removed as requested
 
   // Main body
   let y = height - 180;
   const lineSpacing = 32;
 
   const prefix = "This is to certify that ";
-  const suffix = " from";
+  const suffix = ` of ${data.year} Year ${data.courseName} from `;
 
   // Calculate widths for centering
   const prefixWidth = timesRomanFont.widthOfTextAtSize(prefix, 20);
@@ -289,11 +266,33 @@ export const generateCertificate = async (data) => {
   });
   y -= lineSpacing;
 
+  // Company address
+  const addressLine = 'No:27, 3rd Cross, SithanKudi, Brindavan Colony, Puducherry-605013';
+  page.drawText(addressLine, {
+    x: centerX(addressLine, timesRomanFont, 12),
+    y,
+    size: 12,
+    font: timesRomanFont,
+    color: rgb(0, 0, 0),
+  });
+  y -= lineSpacing;
+
+  // Best wishes line
+  const wishesLine = 'We wish him/her success in all his/her future endeavours';
+  page.drawText(wishesLine, {
+    x: centerX(wishesLine, timesRomanFont, 18),
+    y,
+    size: 18,
+    font: timesRomanFont,
+    color: rgb(0, 0, 0),
+  });
+  y -= lineSpacing;
+
   // held on ... (Brush Script style)
   const heldOnLine = `held on ${holdDate}`;
   page.drawText(heldOnLine, {
     x: centerX(heldOnLine, caveatBrushFont, 26),
-    y:150,
+    y:120,
     size: 24,
     font: caveatBrushFont,
     color: rgb(0, 0, 0),
