@@ -103,7 +103,7 @@ export const generateCertificate = async (data) => {
       const logoBytes = dataURLToUint8Array(logo);
       const logoImg = await pdfDoc.embedPng(logoBytes);
       page.drawImage(logoImg, {
-        x: 60,
+        x: 70,
         y: height - 120,
         width: 100,
         height: 60,
