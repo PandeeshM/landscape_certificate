@@ -32,13 +32,12 @@ export const generateCertificate = async (data) => {
   const {
     studentName,
     institutionName,
-    Date,
+    visitDate,
     holdDate,
     companyName,
     certificateTitle,
     logo,
     signature,
-    visitDate,
   } = data;
 
   const pdfDoc = await PDFDocument.create();
@@ -119,14 +118,14 @@ export const generateCertificate = async (data) => {
     try {
       const logoBytes = dataURLToUint8Array(logo);
       const watermarkImg = await pdfDoc.embedPng(logoBytes);
-      const wmWidth = 350;
-      const wmHeight = 250;
+      const wmWidth = 500;  // Increased from 350
+      const wmHeight = 357; // Increased from 250 (maintaining aspect ratio)
       page.drawImage(watermarkImg, {
         x: (width - wmWidth) / 2,
         y: (height - wmHeight) / 2,
         width: wmWidth,
         height: wmHeight,
-        opacity: 0.1, // Increased from 0.07 to 0.1 (10% opacity)
+        opacity: 0.15, // Increased from 0.1 to 0.15 (15% opacity)
       });
     } catch (error) {
       console.error('Error loading watermark:', error);
@@ -170,6 +169,18 @@ export const generateCertificate = async (data) => {
   } catch (error) {
     console.error('Failed to load Caveat Brush font:', error);
     caveatBrushFont = boldFont; // fallback
+  }
+
+  // Format date to Indian format (DD/MM/YYYY)
+  function formatToIndianDate(dateString) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    if (isNaN(date)) return dateString; // Return original if invalid date
+    
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
   }
 
   // Centering helper
@@ -289,7 +300,8 @@ export const generateCertificate = async (data) => {
   y -= lineSpacing;
 
   // held on ... (Brush Script style)
-  const heldOnLine = `held on ${holdDate}`;
+  const formattedHoldDate = formatToIndianDate(holdDate);
+  const heldOnLine = `held on ${formattedHoldDate}`;
   page.drawText(heldOnLine, {
     x: centerX(heldOnLine, caveatBrushFont, 26),
     y:120,
@@ -299,7 +311,8 @@ export const generateCertificate = async (data) => {
   })
 
   // Date (bottom left)
-  page.drawText(`Date: ${data.visitDate}`, {
+  const formattedVisitDate = formatToIndianDate(visitDate);
+  page.drawText(`Date: ${formattedVisitDate}`, {
     x: 60,
     y: 60,
     size: 14,
