@@ -56,7 +56,8 @@ export const generateCertificate = async (data) => {
   
   // Draw double border using lines
   const outerMargin = 40; // Outer margin from the page edges
-  const innerMargin = 50; // Inner margin for double border effect
+  const borderGap = 4; // Gap between the two borders
+  const innerMargin = outerMargin + borderGap; // Inner margin for double border effect
   const borderWidth = 0.75; // Thickness of each border line
   const borderColor = rgb(0, 0, 0); // Pure black color
   
@@ -116,7 +117,7 @@ export const generateCertificate = async (data) => {
       page.drawImage(logoImg, {
         x: 60,
         y: height - 120,
-        width: 120,
+        width: 140,
         height: 70,
       });
     } catch (error) {
@@ -130,7 +131,7 @@ export const generateCertificate = async (data) => {
     try {
       const logoBytes = dataURLToUint8Array(logo);
       const watermarkImg = await pdfDoc.embedPng(logoBytes);
-      const wmWidth = 500;  // Increased from 350
+      const wmWidth = 530;  // Increased from 350
       const wmHeight = 357; // Increased from 250 (maintaining aspect ratio)
       page.drawImage(watermarkImg, {
         x: (width - wmWidth) / 2,
@@ -255,9 +256,9 @@ export const generateCertificate = async (data) => {
 
   // Institute name (bold)
   page.drawText(institutionName, {
-    x: centerX(institutionName, cinzelFont, 20),
+    x: centerX(institutionName, cinzelFont, 18),
     y,
-    size: 20,
+    size: 18,
     font: cinzelFont,
   });
   y -= lineSpacing;
@@ -294,7 +295,7 @@ export const generateCertificate = async (data) => {
   y -= lineSpacing;
 
   // Company address
-  const addressLine = 'No:27, 3rd Cross, SithanKudi, Brindavan Colony, Puducherry-605013';
+  const addressLine = ' Located at No:27, 3rd Cross, SithanKudi, Brindavan Colony, Puducherry-605013';
   page.drawText(addressLine, {
     x: centerX(addressLine, timesRomanFont, 14),
     y,
@@ -305,7 +306,7 @@ export const generateCertificate = async (data) => {
   y -= lineSpacing;
 
   // Best wishes line
-  const wishesLine = 'We appreciate their enthusiasm in bridging learning with real-world experience.';
+  const wishesLine = 'We wish him/her success and betterment in future.';
   page.drawText(wishesLine, {
     x: centerX(wishesLine, timesRomanFont, 20),
     y,
@@ -322,7 +323,7 @@ export const generateCertificate = async (data) => {
     x: 60,
     y: 60,
     size: 14,
-    font: timesRomanFont,
+    font: boldFont, // Changed to bold font
   });
 
   // Authorized Signatory (bottom right)
