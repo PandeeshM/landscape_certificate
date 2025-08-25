@@ -8,8 +8,6 @@ const CertificateForm = ({ onGenerate }) => {
     courseName: '',
     institutionName: '',
     visitDate: '',
-    holdDate: '',
-    companyName: '',
     certificateTitle: 'Certificate of Participation'
   });
 
@@ -18,9 +16,32 @@ const CertificateForm = ({ onGenerate }) => {
 
   // Function to validate date format and range
   const isValidDate = (dateStr) => {
+    // First check format is YYYY-MM-DD with 4-digit year
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+      setMessage('Please enter date in YYYY-MM-DD format with 4-digit year');
+      return false;
+    }
+    
     const date = new Date(dateStr);
     const year = date.getFullYear();
-    return /^\d{4}-\d{2}-\d{2}$/.test(dateStr) && year >= 1900 && year <= 2100;
+    
+    // Check if the date is valid and year is between 1900 and 2100
+    if (isNaN(date.getTime()) || year < 1900 || year > 2100) {
+      setMessage('Please enter a valid date between 1900 and 2100');
+      return false;
+    }
+    
+    // Check if the parsed date matches the input (to catch invalid dates like 2023-02-31)
+    const [inputYear, inputMonth, inputDay] = dateStr.split('-').map(Number);
+    if (date.getFullYear() !== inputYear || 
+        date.getMonth() + 1 !== inputMonth || 
+        date.getDate() !== inputDay) {
+      setMessage('Please enter a valid date');
+      return false;
+    }
+    
+    setMessage('');
+    return true;
   };
 
   const handleChange = (e) => {
@@ -79,9 +100,9 @@ const CertificateForm = ({ onGenerate }) => {
     setLoading(true);
     setMessage('');
 
-    // Validate dates
-    if (!isValidDate(formData.visitDate) || !isValidDate(formData.holdDate)) {
-      setMessage('Please enter valid dates with 4-digit years.');
+    // Validate visit date
+    if (!isValidDate(formData.visitDate)) {
+      setMessage('Please enter a valid visit date with 4-digit year (YYYY-MM-DD)');
       setLoading(false);
       return;
     }
@@ -152,22 +173,9 @@ const CertificateForm = ({ onGenerate }) => {
           onChange={handleChange}
         />
       </label>
-      <input
-        name="companyName"
-        placeholder="Company Name"
-        required
-        onChange={handleChange}
-      />
       <label>Date:</label>
       <input
         name="visitDate"
-        type="date"
-        required
-        onChange={handleChange}
-      />
-      <label>HoldOn Date:</label>
-      <input
-        name="holdDate"
         type="date"
         required
         onChange={handleChange}

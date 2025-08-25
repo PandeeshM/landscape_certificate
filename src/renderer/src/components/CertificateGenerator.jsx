@@ -33,7 +33,6 @@ export const generateCertificate = async (data) => {
     studentName,
     institutionName,
     visitDate,
-    holdDate,
     companyName,
     certificateTitle,
     logo,
@@ -55,38 +54,51 @@ export const generateCertificate = async (data) => {
     color: rgb(1, 1, 1), // White background
   });
   
-  // Draw border using lines for better reliability
-  const borderMargin = 40; // Margin from the page edges
-  const borderWidth = 2;   // Thickness of the border
+  // Draw double border using lines
+  const outerMargin = 40; // Outer margin from the page edges
+  const innerMargin = 50; // Inner margin for double border effect
+  const borderWidth = 0.75; // Thickness of each border line
+  const borderColor = rgb(0, 0, 0); // Pure black color
   
-  // Draw outer border (top, right, bottom, left)
-  page.drawLine({
-    start: { x: borderMargin, y: height - borderMargin },
-    end: { x: width - borderMargin, y: height - borderMargin },
-    thickness: borderWidth,
-    color: rgb(0.2, 0.2, 0.2),
-  });
+  // Function to draw a rectangle border
+  const drawBorder = (margin) => {
+    // Top border
+    page.drawLine({
+      start: { x: margin, y: height - margin },
+      end: { x: width - margin, y: height - margin },
+      thickness: borderWidth,
+      color: borderColor,
+    });
+    
+    // Right border
+    page.drawLine({
+      start: { x: width - margin, y: height - margin },
+      end: { x: width - margin, y: margin },
+      thickness: borderWidth,
+      color: borderColor,
+    });
+    
+    // Bottom border
+    page.drawLine({
+      start: { x: width - margin, y: margin },
+      end: { x: margin, y: margin },
+      thickness: borderWidth,
+      color: borderColor,
+    });
+    
+    // Left border
+    page.drawLine({
+      start: { x: margin, y: margin },
+      end: { x: margin, y: height - margin },
+      thickness: borderWidth,
+      color: borderColor,
+    });
+  };
   
-  page.drawLine({
-    start: { x: width - borderMargin, y: height - borderMargin },
-    end: { x: width - borderMargin, y: borderMargin },
-    thickness: borderWidth,
-    color: rgb(0.2, 0.2, 0.2),
-  });
-  
-  page.drawLine({
-    start: { x: width - borderMargin, y: borderMargin },
-    end: { x: borderMargin, y: borderMargin },
-    thickness: borderWidth,
-    color: rgb(0.2, 0.2, 0.2),
-  });
-  
-  page.drawLine({
-    start: { x: borderMargin, y: borderMargin },
-    end: { x: borderMargin, y: height - borderMargin },
-    thickness: borderWidth,
-    color: rgb(0.2, 0.2, 0.2),
-  });
+  // Draw outer border
+  drawBorder(outerMargin);
+  // Draw inner border
+  drawBorder(innerMargin);
 
   // Use default font since we can't load custom fonts in browser
   const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
@@ -104,8 +116,8 @@ export const generateCertificate = async (data) => {
       page.drawImage(logoImg, {
         x: 60,
         y: height - 120,
-        width: 100,
-        height: 60,
+        width: 120,
+        height: 70,
       });
     } catch (error) {
       console.error('Error loading logo:', error);
@@ -202,9 +214,12 @@ export const generateCertificate = async (data) => {
   // Main body
   let y = height - 180;
   const lineSpacing = 32;
+  
+  // Add extra spacing at the top of the content
+  y -= lineSpacing;
 
-  const prefix = "This is to certify that ";
-  const suffix = ` of ${data.year} Year ${data.courseName} from `;
+  const prefix = "This is to certify that Mr/Ms ";
+  const suffix = `, ${data.year} Year ${data.courseName} from `;
 
   // Calculate widths for centering
   const prefixWidth = timesRomanFont.widthOfTextAtSize(prefix, 20);
@@ -240,9 +255,9 @@ export const generateCertificate = async (data) => {
 
   // Institute name (bold)
   page.drawText(institutionName, {
-    x: centerX(institutionName, cinzelFont, 24),
+    x: centerX(institutionName, cinzelFont, 20),
     y,
-    size: 24,
+    size: 20,
     font: cinzelFont,
   });
   y -= lineSpacing;
@@ -250,9 +265,9 @@ export const generateCertificate = async (data) => {
   // participated in the Industrial Visit
   const visitLine = 'participated in the Industrial Visit';
   page.drawText(visitLine, {
-    x: centerX(visitLine, timesRomanFont, 18),
+    x: centerX(visitLine, timesRomanFont, 20),
     y,
-    size: 18,
+    size: 20,
     font: timesRomanFont,
   });
   y -= lineSpacing;
@@ -260,18 +275,19 @@ export const generateCertificate = async (data) => {
   // at
   const atLine = 'at';
   page.drawText(atLine, {
-    x: centerX(atLine, timesRomanFont, 18),
+    x: centerX(atLine, timesRomanFont, 20),
     y,
-    size: 18,
+    size: 20,
     font: timesRomanFont,
   });
   y -= lineSpacing;
 
-  // Company name (green, bold)
-  page.drawText(companyName, {
-    x: centerX(companyName, cinzelFont, 22),
+  // Company name (green, bold) - Static
+  const staticCompanyName = 'AAHA Solutions';
+  page.drawText(staticCompanyName, {
+    x: centerX(staticCompanyName, cinzelFont, 24),
     y,
-    size: 22,
+    size: 24,
     font: cinzelFont,
     color: rgb(0.094, 0.274, 0.067),
   });
@@ -280,35 +296,25 @@ export const generateCertificate = async (data) => {
   // Company address
   const addressLine = 'No:27, 3rd Cross, SithanKudi, Brindavan Colony, Puducherry-605013';
   page.drawText(addressLine, {
-    x: centerX(addressLine, timesRomanFont, 12),
+    x: centerX(addressLine, timesRomanFont, 14),
     y,
-    size: 12,
+    size: 14,
     font: timesRomanFont,
     color: rgb(0, 0, 0),
   });
   y -= lineSpacing;
 
   // Best wishes line
-  const wishesLine = 'We wish him/her success in all his/her future endeavours';
+  const wishesLine = 'We appreciate their enthusiasm in bridging learning with real-world experience.';
   page.drawText(wishesLine, {
-    x: centerX(wishesLine, timesRomanFont, 18),
+    x: centerX(wishesLine, timesRomanFont, 20),
     y,
-    size: 18,
+    size: 20,
     font: timesRomanFont,
     color: rgb(0, 0, 0),
   });
   y -= lineSpacing;
 
-  // held on ... (Brush Script style)
-  const formattedHoldDate = formatToIndianDate(holdDate);
-  const heldOnLine = `held on ${formattedHoldDate}`;
-  page.drawText(heldOnLine, {
-    x: centerX(heldOnLine, caveatBrushFont, 26),
-    y:120,
-    size: 24,
-    font: caveatBrushFont,
-    color: rgb(0, 0, 0),
-  })
 
   // Date (bottom left)
   const formattedVisitDate = formatToIndianDate(visitDate);
