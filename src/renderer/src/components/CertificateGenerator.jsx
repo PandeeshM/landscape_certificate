@@ -205,7 +205,7 @@ export const generateCertificate = async (data) => {
   page.drawText(certificateTitle, {
     x: centerX(certificateTitle, oldEnglishFont, 36),
     y: height - 110,
-    size: 36,
+    size: 40,
     color: rgb(0.282, 0.431, 0.086),
     font: oldEnglishFont,
   });
@@ -284,6 +284,7 @@ export const generateCertificate = async (data) => {
   y -= lineSpacing;
 
   // Company name (green, bold) - Static
+  // Company name (green, bold) - Static
   const staticCompanyName = 'AAHA Solutions';
   page.drawText(staticCompanyName, {
     x: centerX(staticCompanyName, cinzelFont, 24),
@@ -291,6 +292,17 @@ export const generateCertificate = async (data) => {
     size: 24,
     font: cinzelFont,
     color: rgb(0.094, 0.274, 0.067),
+  });
+  y -= lineSpacing;
+
+  // Company description
+  const companyDescription = '(a software development company)';
+  page.drawText(companyDescription, {
+    x: centerX(companyDescription, timesRomanFont, 14),
+    y,
+    size: 14,
+    font: timesRomanFont,
+    color: rgb(0, 0, 0),
   });
   y -= lineSpacing;
 
