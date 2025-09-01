@@ -184,11 +184,17 @@ export const generateCertificate = async (data) => {
     caveatBrushFont = boldFont; // fallback
   }
 
+    // Helper function to clean text by replacing special characters
+  const cleanText = (text) => {
+    if (typeof text !== 'string') return text;
+    return text.replace(/\t/g, ' ').replace(/[\x00-\x1F\x7F-\x9F]/g, ' ').trim();
+  };
+
   // Format date to Indian format (DD/MM/YYYY)
   function formatToIndianDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
-    if (isNaN(date)) return dateString; // Return original if invalid date
+    if (isNaN(date)) return ''; // Return empty string if invalid date
     
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -229,24 +235,27 @@ export const generateCertificate = async (data) => {
   const totalWidth = prefixWidth + studentWidth + suffixWidth;
   const startX = (width - totalWidth) / 2;
 
-  // Draw prefix
-  page.drawText(prefix, {
+  // Clean and draw prefix
+  const cleanPrefix = cleanText(prefix);
+  page.drawText(cleanPrefix, {
     x: startX,
     y,
     size: 20,
     font: timesRomanFont,
   });
 
-  // Draw student name in bold
-  page.drawText(studentName, {
+  // Clean and draw student name in bold
+  const cleanStudentName = cleanText(studentName);
+  page.drawText(cleanStudentName, {
     x: startX + prefixWidth,
     y,
     size: 20,
     font: boldFont,
   });
 
-  // Draw suffix
-  page.drawText(suffix, {
+  // Clean and draw suffix
+  const cleanSuffix = cleanText(suffix);
+  page.drawText(cleanSuffix, {
     x: startX + prefixWidth + studentWidth,
     y,
     size: 20,
@@ -254,12 +263,21 @@ export const generateCertificate = async (data) => {
   });
   y -= lineSpacing;
 
-  // Institute name (bold)
-  page.drawText(institutionName, {
-    x: centerX(institutionName, cinzelFont, 18),
+  // Clean and draw institute name (bold)
+  const cleanInstitutionName = cleanText(institutionName);
+  // Use a slightly smaller size for better fit with capital letters
+  const instNameSize = 17; // Reduced from 18
+  
+  // Calculate width with the actual font and size
+  const instNameWidth = cinzelFont.widthOfTextAtSize(cleanInstitutionName, instNameSize);
+  
+  page.drawText(cleanInstitutionName, {
+    x: (width - instNameWidth) / 2, // Manual centering for better accuracy
     y,
-    size: 18,
+    size: instNameSize,
     font: cinzelFont,
+    maxWidth: width - 120, // Prevent overflow
+    lineHeight: instNameSize * 1.2,
   });
   y -= lineSpacing;
 
