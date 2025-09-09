@@ -33,7 +33,6 @@ export const generateCertificate = async (data) => {
     studentName,
     institutionName,
     visitDate,
-    companyName,
     certificateTitle,
     logo,
     signature,
@@ -212,7 +211,7 @@ export const generateCertificate = async (data) => {
     x: centerX(certificateTitle, oldEnglishFont, 36),
     y: height - 110,
     size: 40,
-    color: rgb(0.282, 0.431, 0.086),
+    color: rgb(118/255, 166/255, 68/255),
     font: oldEnglishFont,
   });
 
@@ -309,7 +308,7 @@ export const generateCertificate = async (data) => {
     y,
     size: 24,
     font: cinzelFont,
-    color: rgb(0.094, 0.274, 0.067),
+    color: rgb(118/255, 166/255, 68/255),
   });
   y -= lineSpacing;
 
@@ -377,6 +376,7 @@ export const generateCertificate = async (data) => {
       });
     } catch (error) {
       console.error('Error loading signature:', error);
+      
       // If signature fails to load, just skip it without throwing an error
     }
   }
