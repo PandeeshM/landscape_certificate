@@ -36,6 +36,11 @@ export const generateCertificate = async (data) => {
     certificateTitle,
     logo,
     signature,
+    projectTitle,
+    technologies,
+    duration,
+    internshipStartDate,
+    internshipEndDate,
   } = data;
 
   const pdfDoc = await PDFDocument.create();
@@ -278,17 +283,140 @@ export const generateCertificate = async (data) => {
     maxWidth: width - 120, // Prevent overflow
     lineHeight: instNameSize * 1.2,
   });
+  // Spacing between institution and internship text
   y -= lineSpacing;
 
-  // participated in the Industrial Visit
-  const visitLine = 'participated in the Industrial Visit';
-  page.drawText(visitLine, {
-    x: centerX(visitLine, timesRomanFont, 20),
-    y,
-    size: 20,
-    font: timesRomanFont,
-  });
-  y -= lineSpacing;
+  // Internship completion text with all details
+  const visitLine = 'as she/he has successfully completed the Internship in ';
+  const visitLineWidth = timesRomanFont.widthOfTextAtSize(visitLine, 20);
+  
+  // Build the full internship description - split for bold project title
+  let internshipDescription = '';
+  let projectTitleBold = '';
+  let technologiesText = '';
+  let durationText = '';
+  
+  if (projectTitle) {
+    internshipDescription += 'a project titled "';
+    projectTitleBold = cleanText(projectTitle);
+    internshipDescription += '"';
+  }
+  
+  if (technologies) {
+    technologiesText = `(using ${cleanText(technologies)})`;
+  }
+  
+  if (duration && internshipStartDate && internshipEndDate) {
+    const formattedStartDate = formatToIndianDate(internshipStartDate);
+    const formattedEndDate = formatToIndianDate(internshipEndDate);
+    durationText = `in ${cleanText(duration)} during the period ${formattedStartDate} to ${formattedEndDate}`;
+  }
+
+  // Draw main internship description with bold project title - CENTERED ALIGNMENT
+  const contentMargin = 60;
+  const contentMaxWidth = width - (contentMargin * 2);
+  const fontSize = 16;
+  
+  // Build parts: before project title
+  const beforeProject = visitLine + 'a project titled "';
+  const afterProject = '"';
+  
+  // Draw text with mixed fonts (regular and bold for project title) - CENTERED
+  if (projectTitle) {
+    // Build the full line to calculate total width for centering
+    const fullLineBeforeQuote = beforeProject;
+    const fullLineAfterQuote = afterProject;
+    
+    const beforeWidth = timesRomanFont.widthOfTextAtSize(fullLineBeforeQuote, fontSize);
+    const boldWidth = boldFont.widthOfTextAtSize(projectTitleBold, fontSize);
+    const afterWidth = timesRomanFont.widthOfTextAtSize(fullLineAfterQuote, fontSize);
+    const totalWidth = beforeWidth + boldWidth + afterWidth;
+    
+    // Center the entire line
+    const centeredX = (width - totalWidth) / 2;
+    
+    // Draw before project title (regular)
+    page.drawText(fullLineBeforeQuote, {
+      x: centeredX,
+      y,
+      size: fontSize,
+      font: timesRomanFont,
+    });
+    
+    // Draw project title (bold) right after
+    page.drawText(projectTitleBold, {
+      x: centeredX + beforeWidth,
+      y,
+      size: fontSize,
+      font: boldFont,
+    });
+    
+    // Draw closing quote (regular)
+    page.drawText(fullLineAfterQuote, {
+      x: centeredX + beforeWidth + boldWidth,
+      y,
+      size: fontSize,
+      font: timesRomanFont,
+    });
+  } else {
+    // If no project title, just draw the regular text centered
+    const fullText = visitLine + internshipDescription;
+    page.drawText(fullText, {
+      x: 60,
+      y,
+      size: fontSize,
+      font: timesRomanFont,
+      maxWidth: contentMaxWidth,
+      lineHeight: fontSize * 1.4,
+    });
+  }
+  
+  // Minimal spacing after internship description
+  y -= lineSpacing * 0.8;
+
+  // Draw technologies on separate line if available - CENTERED
+  if (technologies) {
+    const techWidth = timesRomanFont.widthOfTextAtSize(technologiesText, fontSize);
+    const techX = (width - techWidth) / 2;
+    
+    page.drawText(technologiesText, {
+      x: techX,
+      y,
+      size: fontSize,
+      font: timesRomanFont,
+    });
+    // Minimal spacing after technologies
+    y -= lineSpacing * 0.7;
+  }
+
+  // Draw duration on separate line if available - CENTERED with wrapping
+  if (durationText) {
+    const durationLines = Math.ceil(durationText.length / 70);
+    
+    if (durationLines === 1) {
+      // If fits on one line, center it
+      const durationWidth = timesRomanFont.widthOfTextAtSize(durationText, fontSize);
+      const durationX = (width - durationWidth) / 2;
+      
+      page.drawText(durationText, {
+        x: durationX,
+        y,
+        size: fontSize,
+        font: timesRomanFont,
+      });
+    } else {
+      // If multiple lines, use centered margin
+      page.drawText(durationText, {
+        x: 60,
+        y,
+        size: fontSize,
+        font: timesRomanFont,
+        maxWidth: contentMaxWidth,
+        lineHeight: fontSize * 1.4,
+      });
+    }
+    y -= lineSpacing * 1;
+  }
 
   // at
   const atLine = 'at';

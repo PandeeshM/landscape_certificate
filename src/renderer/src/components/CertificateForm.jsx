@@ -8,7 +8,13 @@ const CertificateForm = ({ onGenerate }) => {
     courseName: '',
     institutionName: '',
     visitDate: '',
-    certificateTitle: 'Certificate of Participation'
+    certificateTitle: 'Certificate of Participation',
+    projectTitle: '',
+    technologies: '',
+    duration: '',
+    internshipStartDate: '',
+    internshipEndDate: '',
+    internshipCourse: ''
   });
 
   const [loading, setLoading] = useState(false);
@@ -178,6 +184,52 @@ const CertificateForm = ({ onGenerate }) => {
         name="visitDate"
         type="date"
         required
+        onChange={handleChange}
+      />
+
+      <label>
+        <input
+          name="internshipCourse"
+          placeholder="Internship Course/Domain (e.g., web development)"
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        <input
+          name="projectTitle"
+          placeholder="Project Title"
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        <input
+          name="technologies"
+          placeholder="Technologies (e.g., HTML, CSS, JavaScript)"
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>
+        <input
+          name="duration"
+          placeholder="Duration (e.g., fifteen days)"
+          onChange={handleChange}
+        />
+      </label>
+
+      <label>Internship Start Date:</label>
+      <input
+        name="internshipStartDate"
+        type="date"
+        onChange={handleChange}
+      />
+
+      <label>Internship End Date:</label>
+      <input
+        name="internshipEndDate"
+        type="date"
         onChange={handleChange}
       />
 
