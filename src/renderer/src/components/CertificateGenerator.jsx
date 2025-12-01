@@ -33,6 +33,8 @@ export const createCertificatePdf = async (data) => {
     studentName,
     institutionName,
     visitDate,
+
+    
     certificateTitle,
     logo,
     signature,

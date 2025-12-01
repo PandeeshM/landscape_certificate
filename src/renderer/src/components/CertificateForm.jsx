@@ -211,7 +211,7 @@ const CertificateForm = ({ onGenerate }) => {
           </div>
 
           <div className="form-group">
-            <label className="form-label">Institution Logo</label>
+            <label className="form-label">Company Logo</label>
             <div className="file-input-wrapper">
               <input
                 name="logo"
@@ -220,7 +220,7 @@ const CertificateForm = ({ onGenerate }) => {
                 onChange={handleChange}
               />
               <div className="file-input-content">
-                <span className="file-icon">📷</span>
+                <span className="file-icon"></span>
                 <span>{fileNames.logo || 'Click to upload Logo (PNG)'}</span>
               </div>
             </div>
@@ -236,7 +236,7 @@ const CertificateForm = ({ onGenerate }) => {
                 onChange={handleChange}
               />
               <div className="file-input-content">
-                <span className="file-icon">✍️</span>
+                <span className="file-icon"></span>
                 <span>{fileNames.signature || 'Click to upload Signature (PNG)'}</span>
               </div>
             </div>
