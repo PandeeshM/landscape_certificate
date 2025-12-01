@@ -16,7 +16,7 @@ function dataURLToUint8Array(dataURL) {
   return bytes;
 }
 
-export const generateCertificate = async (data) => {
+export const createCertificatePdf = async (data) => {
   // Validate only required image inputs
   const validateImage = (imageData, name) => {
     if (!imageData) return;
@@ -43,7 +43,7 @@ export const generateCertificate = async (data) => {
   // Set page size to A4 in landscape (842 x 595 points)
   const page = pdfDoc.addPage([842, 595]);
   const { width, height } = page.getSize();
-  
+
   // Draw white background first
   page.drawRectangle({
     x: 0,
@@ -52,14 +52,14 @@ export const generateCertificate = async (data) => {
     height,
     color: rgb(1, 1, 1), // White background
   });
-  
+
   // Draw double border using lines
   const outerMargin = 40; // Outer margin from the page edges
   const borderGap = 4; // Gap between the two borders
   const innerMargin = outerMargin + borderGap; // Inner margin for double border effect
   const borderWidth = 0.75; // Thickness of each border line
   const borderColor = rgb(0, 0, 0); // Pure black color
-  
+
   // Function to draw a rectangle border
   const drawBorder = (margin) => {
     // Top border
@@ -69,7 +69,7 @@ export const generateCertificate = async (data) => {
       thickness: borderWidth,
       color: borderColor,
     });
-    
+
     // Right border
     page.drawLine({
       start: { x: width - margin, y: height - margin },
@@ -77,7 +77,7 @@ export const generateCertificate = async (data) => {
       thickness: borderWidth,
       color: borderColor,
     });
-    
+
     // Bottom border
     page.drawLine({
       start: { x: width - margin, y: margin },
@@ -85,7 +85,7 @@ export const generateCertificate = async (data) => {
       thickness: borderWidth,
       color: borderColor,
     });
-    
+
     // Left border
     page.drawLine({
       start: { x: margin, y: margin },
@@ -94,7 +94,7 @@ export const generateCertificate = async (data) => {
       color: borderColor,
     });
   };
-  
+
   // Draw outer border
   drawBorder(outerMargin);
   // Draw inner border
@@ -102,10 +102,10 @@ export const generateCertificate = async (data) => {
 
   // Use default font since we can't load custom fonts in browser
   const timesRoman = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  
+
   // Removed top and bottom border images as requested
 
-   const green = rgb(0, 0.5, 0);
+  const green = rgb(0, 0.5, 0);
 
   // Draw dynamic logo if provided
   if (logo) {
@@ -183,7 +183,7 @@ export const generateCertificate = async (data) => {
     caveatBrushFont = boldFont; // fallback
   }
 
-    // Helper function to clean text by replacing special characters
+  // Helper function to clean text by replacing special characters
   const cleanText = (text) => {
     if (typeof text !== 'string') return text;
     return text.replace(/\t/g, ' ').replace(/[\x00-\x1F\x7F-\x9F]/g, ' ').trim();
@@ -194,7 +194,7 @@ export const generateCertificate = async (data) => {
     if (!dateString) return '';
     const date = new Date(dateString);
     if (isNaN(date)) return ''; // Return empty string if invalid date
-    
+
     const day = String(date.getDate()).padStart(2, '0');
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
@@ -211,7 +211,7 @@ export const generateCertificate = async (data) => {
     x: centerX(certificateTitle, oldEnglishFont, 36),
     y: height - 110,
     size: 40,
-    color: rgb(118/255, 166/255, 68/255),
+    color: rgb(118 / 255, 166 / 255, 68 / 255),
     font: oldEnglishFont,
   });
 
@@ -220,7 +220,7 @@ export const generateCertificate = async (data) => {
   // Main body
   let y = height - 180;
   const lineSpacing = 32;
-  
+
   // Add extra spacing at the top of the content
   y -= lineSpacing;
 
@@ -228,9 +228,9 @@ export const generateCertificate = async (data) => {
   const suffix = `, ${data.year} Year ${data.courseName} from `;
 
   // Calculate widths for centering
-  const prefixWidth = timesRomanFont.widthOfTextAtSize(prefix, 20);
-  const studentWidth = boldFont.widthOfTextAtSize(studentName, 20);
-  const suffixWidth = timesRomanFont.widthOfTextAtSize(suffix, 20);
+  const prefixWidth = timesRomanFont.widthOfTextAtSize(prefix, 18);
+  const studentWidth = boldFont.widthOfTextAtSize(studentName, 18);
+  const suffixWidth = timesRomanFont.widthOfTextAtSize(suffix, 18);
   const totalWidth = prefixWidth + studentWidth + suffixWidth;
   const startX = (width - totalWidth) / 2;
 
@@ -239,7 +239,7 @@ export const generateCertificate = async (data) => {
   page.drawText(cleanPrefix, {
     x: startX,
     y,
-    size: 20,
+    size: 18,
     font: timesRomanFont,
   });
 
@@ -248,7 +248,7 @@ export const generateCertificate = async (data) => {
   page.drawText(cleanStudentName, {
     x: startX + prefixWidth,
     y,
-    size: 20,
+    size: 18,
     font: boldFont,
   });
 
@@ -257,7 +257,7 @@ export const generateCertificate = async (data) => {
   page.drawText(cleanSuffix, {
     x: startX + prefixWidth + studentWidth,
     y,
-    size: 20,
+    size: 18,
     font: timesRomanFont,
   });
   y -= lineSpacing;
@@ -266,10 +266,10 @@ export const generateCertificate = async (data) => {
   const cleanInstitutionName = cleanText(institutionName);
   // Use a slightly smaller size for better fit with capital letters
   const instNameSize = 17; // Reduced from 18
-  
+
   // Calculate width with the actual font and size
   const instNameWidth = cinzelFont.widthOfTextAtSize(cleanInstitutionName, instNameSize);
-  
+
   page.drawText(cleanInstitutionName, {
     x: (width - instNameWidth) / 2, // Manual centering for better accuracy
     y,
@@ -308,7 +308,7 @@ export const generateCertificate = async (data) => {
     y,
     size: 24,
     font: cinzelFont,
-    color: rgb(118/255, 166/255, 68/255),
+    color: rgb(118 / 255, 166 / 255, 68 / 255),
   });
   y -= lineSpacing;
 
@@ -376,17 +376,22 @@ export const generateCertificate = async (data) => {
       });
     } catch (error) {
       console.error('Error loading signature:', error);
-      
+
       // If signature fails to load, just skip it without throwing an error
     }
   }
 
   const pdfBytes = await pdfDoc.save();
+  return pdfBytes;
+};
+
+export const generateCertificate = async (data) => {
+  const pdfBytes = await createCertificatePdf(data);
   const blob = new Blob([pdfBytes], { type: 'application/pdf' });
   const link = document.createElement('a');
   link.href = URL.createObjectURL(blob);
-  link.download = `${studentName}_Certificate.pdf`;
+  link.download = `${data.studentName}_Certificate.pdf`;
   link.click();
 };
-  
-export default generateCertificate; 
+
+export default generateCertificate;

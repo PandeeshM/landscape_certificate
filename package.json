@@ -7,7 +7,20 @@
   "homepage": "https://electron-vite.org",
   "scripts": {
     "dev": "electron-vite dev",
-    "build": "electron-vite build"
+    "build": "electron-vite build",
+    "dist": "electron-builder --win --x64"
+  },
+  "build": {
+    "appId": "com.mylandscape.app",
+    "productName": "MyLandscape",
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
   },
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
@@ -21,7 +34,7 @@
     "@electron-toolkit/eslint-config": "^2.0.0",
     "@electron-toolkit/eslint-config-prettier": "^3.0.0",
     "@vitejs/plugin-react": "^4.3.4",
-    "electron": "^35.1.5",
+    "electron": "^35.7.5",
     "electron-builder": "^25.1.8",
     "electron-vite": "^3.1.0",
     "eslint": "^9.24.0",
